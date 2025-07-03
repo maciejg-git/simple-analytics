@@ -7,20 +7,31 @@ const supabasePublicApiKey = "";
 
 let ignoreProtocol = ["file:"];
 let ignoreHostname = ["localhost"];
+let ignorePathname = [];
+
+const trackOncePerSession = true;
+const trackOncePerSessionKey = "isVisited";
 
 let isValidVisit = () => {
   if (
     ignoreProtocol.includes(window.location.protocol) ||
-    ignoreHostname.includes(window.location.hostname)
+    ignoreHostname.includes(window.location.hostname) ||
+    ignorePathname.includes(window.location.pathname)
   ) {
     return false;
   }
 
-  return true
-}
+  return true;
+};
 
-window.addEventListener("load", () => {
-  if (!isValidVisit()) return
+window.addEventListener("load", async () => {
+  if (!isValidVisit()) {
+    return;
+  }
+
+  if (trackOncePerSession && sessionStorage.getItem(trackOncePerSessionKey)) {
+    return;
+  }
 
   let headers = {
     "Content-Type": "application/json",
@@ -28,16 +39,22 @@ window.addEventListener("load", () => {
     Authorization: `Bearer ${supabasePublicApiKey}`,
   };
 
-  fetch(endpoint, {
-    method: "POST",
-    headers,
-    body: JSON.stringify({
-      url: window.location.href,
-      date: new Date().toISOString(),
-      referrer: document.referrer,
-      userAgent: navigator.userAgent,
-    }),
-  }).catch((err) => {
+  try {
+    let res = await fetch(endpoint, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        url: window.location.href,
+        timestamp: new Date().toISOString(),
+        referrer: document.referrer,
+        user_agent: navigator.userAgent,
+      }),
+    });
+
+    if (trackOncePerSession) {
+      sessionStorage.setItem(trackOncePerSessionKey, "true");
+    }
+  } catch (err) {
     console.error("Visit tracking failed:", err);
-  });
+  }
 });
