@@ -9,10 +9,10 @@ let ignoreProtocol = ["file:"];
 let ignoreHostname = ["localhost"];
 let ignorePathname = [];
 
-const trackOncePerSession = true;
-const trackOncePerSessionKey = "isVisited";
+const trackVisitOncePerSession = true;
+const trackVisitOncePerSessionKey = "isVisited";
 
-let isValidVisit = () => {
+let isValidOrigin = () => {
   if (
     ignoreProtocol.includes(window.location.protocol) ||
     ignoreHostname.includes(window.location.hostname) ||
@@ -24,12 +24,8 @@ let isValidVisit = () => {
   return true;
 };
 
-window.addEventListener("load", async () => {
-  if (!isValidVisit()) {
-    return;
-  }
-
-  if (trackOncePerSession && sessionStorage.getItem(trackOncePerSessionKey)) {
+let track = async (detail) => {
+  if (!isValidOrigin()) {
     return;
   }
 
@@ -48,13 +44,35 @@ window.addEventListener("load", async () => {
         timestamp: new Date().toISOString(),
         referrer: document.referrer,
         user_agent: navigator.userAgent,
+        detail,
       }),
     });
 
-    if (trackOncePerSession) {
-      sessionStorage.setItem(trackOncePerSessionKey, "true");
-    }
+    return res.ok
   } catch (err) {
-    console.error("Visit tracking failed:", err);
+    console.error("Tracking failed:", err);
+    return false
   }
+};
+
+let trackVisit = () => {
+  if (
+    trackVisitOncePerSession &&
+    sessionStorage.getItem(trackVisitOncePerSessionKey)
+  ) {
+    return;
+  }
+
+  let res = track("visit");
+
+  if (trackVisitOncePerSession) {
+    sessionStorage.setItem(trackVisitOncePerSessionKey, "true");
+  }
+};
+
+window.addEventListener("load", (ev) => {
+  trackVisit();
+  window.addEventListener("sa-track", (ev) => {
+    track(ev.detail);
+  });
 });
