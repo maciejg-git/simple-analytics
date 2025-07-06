@@ -1,78 +1,95 @@
-const supabaseProjectId = "";
-const supabaseTable = "visits";
-const supabasePath = `/rest/v1/${supabaseTable}`;
-const endpoint = `https://${supabaseProjectId}.supabase.co${supabasePath}`;
-
-const supabasePublicApiKey = "";
-
-let ignoreProtocol = ["file:"];
-let ignoreHostname = ["localhost"];
-let ignorePathname = [];
-
-const trackVisitOncePerSession = true;
-const trackVisitOncePerSessionKey = "isVisited";
-
-let isValidOrigin = () => {
-  if (
-    ignoreProtocol.includes(window.location.protocol) ||
-    ignoreHostname.includes(window.location.hostname) ||
-    ignorePathname.includes(window.location.pathname)
-  ) {
-    return false;
+function initSimpleAnalytics(projectId, apiKey, userConfig = {}) {
+  if (!projectId) {
+    return;
   }
-
-  return true;
-};
-
-let track = async (detail) => {
-  if (!isValidOrigin()) {
+  if (!apiKey) {
+    return;
+  }
+  if (!userConfig.table) {
     return;
   }
 
-  let headers = {
-    "Content-Type": "application/json",
-    apikey: supabasePublicApiKey,
-    Authorization: `Bearer ${supabasePublicApiKey}`,
+  const supabasePath = `/rest/v1/${userConfig.table}`;
+  const supabaseEndpoint = `https://${projectId}.supabase.co${supabasePath}`;
+
+  let config = {
+    skipOriginCheck: false,
+    ignoreProtocol: ["file:"],
+    ignoreHostname: ["localhost"],
+    ignorePathname: [],
+    trackVisitOncePerSession: false,
+    trackVisitOncePerSessionKey: "isVisited",
+    trackOnCustomEvent: true,
+    ...userConfig,
   };
 
-  try {
-    let res = await fetch(endpoint, {
-      method: "POST",
-      headers,
-      body: JSON.stringify({
-        url: window.location.href,
-        timestamp: new Date().toISOString(),
-        referrer: document.referrer,
-        user_agent: navigator.userAgent,
-        detail,
-      }),
-    });
+  let isValidOrigin = () => {
+    if (
+      config.ignoreProtocol.includes(window.location.protocol) ||
+      config.ignoreHostname.includes(window.location.hostname) ||
+      config.ignorePathname.includes(window.location.pathname)
+    ) {
+      return false;
+    }
 
-    return res.ok
-  } catch (err) {
-    console.error("Tracking failed:", err);
-    return false
-  }
-};
+    return true;
+  };
 
-let trackVisit = () => {
-  if (
-    trackVisitOncePerSession &&
-    sessionStorage.getItem(trackVisitOncePerSessionKey)
-  ) {
-    return;
-  }
+  let track = async (detail) => {
+    if (!config.skipOriginCheck && !isValidOrigin()) {
+      return;
+    }
 
-  let res = track("visit");
+    let headers = {
+      "Content-Type": "application/json",
+      apikey: apiKey,
+      Authorization: `Bearer ${apiKey}`,
+    };
 
-  if (trackVisitOncePerSession) {
-    sessionStorage.setItem(trackVisitOncePerSessionKey, "true");
-  }
-};
+    try {
+      let res = await fetch(supabaseEndpoint, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          url: window.location.href,
+          hostname: window.location.hostname,
+          pathname: window.location.pathname,
+          timestamp: new Date().toISOString(),
+          referrer: document.referrer,
+          user_agent: navigator.userAgent,
+          detail,
+        }),
+      });
 
-window.addEventListener("load", (ev) => {
-  trackVisit();
-  window.addEventListener("sa-track", (ev) => {
-    track(ev.detail);
+      return res;
+    } catch (err) {
+      console.error("Tracking failed:", err);
+      return false;
+    }
+  };
+
+  let trackVisit = () => {
+    if (
+      config.trackVisitOncePerSession &&
+      sessionStorage.getItem(config.trackVisitOncePerSessionKey)
+    ) {
+      return;
+    }
+
+    let res = track("visit");
+
+    if (res.ok && config.trackVisitOncePerSession) {
+      sessionStorage.setItem(config.trackVisitOncePerSessionKey, "true");
+    }
+  };
+
+  window.addEventListener("load", (ev) => {
+    trackVisit();
+
+    if (config.trackOnCustomEvent) {
+      window.addEventListener("sa-track", (ev) => {
+        track(ev.detail);
+      });
+    }
   });
-});
+}
