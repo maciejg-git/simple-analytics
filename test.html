@@ -1,12 +1,33 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title></title>
     <script src="./simple-analytics.js"></script>
+    <script
+      defer
+      src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
+    ></script>
+    <script>
+      initSimpleAnalytics(
+        "qirhwtbdwduaftlaange",
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFpcmh3dGJkd2R1YWZ0bGFhbmdlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEyOTYzOTAsImV4cCI6MjA2Njg3MjM5MH0.UP9IWKPk9y3kZ8xCl0L6oAua4YZJxyjcy6ePRc1PgBk",
+        { table: "visits" },
+      );
+    </script>
   </head>
   <body>
-  
+    <div x-data>
+      <button
+        @click="() => {
+          window.dispatchEvent(
+            new CustomEvent('sa-track', { detail: { event: 'button click' }})
+          )
+        }"
+      >
+        dispatch sa-track
+      </button>
+    </div>
   </body>
 </html>
