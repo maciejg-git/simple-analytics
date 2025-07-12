@@ -17,8 +17,8 @@ function initSimpleAnalytics(projectId, apiKey, userConfig = {}) {
     ignoreProtocol: ["file:"],
     ignoreHostname: ["localhost"],
     ignorePathname: [],
-    trackVisitOncePerSession: false,
-    trackVisitOncePerSessionKey: "isVisited",
+    trackViewOncePerSession: false,
+    trackViewOncePerSessionKey: "isViewed",
     trackOnCustomEvent: true,
     ...userConfig,
   };
@@ -68,23 +68,23 @@ function initSimpleAnalytics(projectId, apiKey, userConfig = {}) {
     }
   };
 
-  let trackVisit = () => {
+  let trackView = () => {
     if (
-      config.trackVisitOncePerSession &&
-      sessionStorage.getItem(config.trackVisitOncePerSessionKey)
+      config.trackViewOncePerSession &&
+      sessionStorage.getItem(config.trackViewOncePerSessionKey)
     ) {
       return;
     }
 
-    let res = track("visit");
+    let res = track("view");
 
-    if (res.ok && config.trackVisitOncePerSession) {
-      sessionStorage.setItem(config.trackVisitOncePerSessionKey, "true");
+    if (res.ok && config.trackViewOncePerSession) {
+      sessionStorage.setItem(config.trackViewOncePerSessionKey, "true");
     }
   };
 
   window.addEventListener("load", (ev) => {
-    trackVisit();
+    trackView();
 
     if (config.trackOnCustomEvent) {
       window.addEventListener("sa-track", (ev) => {
