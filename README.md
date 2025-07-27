@@ -1,16 +1,16 @@
 # simple-analytics
 
-Super simple analytics script that tracks visits of your pages. It uses Supabase by default but can be easily modified to send data to any backend.
+Super simple analytics script that tracks visits of your pages. It uses Supabase API by default but can be easily modified to send data to any backend.
 
-### Features
+## Features
 
-- super simple
+- super small and simple
 - tracks views per hostname and pathname, including date, referrer and user agent
 - totally private
 - easy to self-host, just create supabase project and run few SQL scripts
 - tracks views by default, but can be extended to track anything by dispatching custom events
 
-### Usage
+## Usage
 
 Create a Supabase project and run the following SQL to prepare the database and user:
 
@@ -61,12 +61,12 @@ You can test it locally by adding `skipOriginCheck` in the config object. This e
 </script>
 ```
 
-### Configuration
+## Configuration
 
 Some settings can be modified in the config object. These include:
 
 - `skipOriginCheck` - skips checking ignored protocols, hostnames and pathnames entirely. Useful for testing. Default: `false`.
-- `ignoreProtocol` - array of ignored protocols. Default: `['file']`.
+- `ignoreProtocol` - array of ignored protocols. Default: `['file:']`.
 - `ignoreHostname` - array of ignored hostnames. Default: `['localhost']`.
 - `ignorePathname` - array of ignored pathnames. Default: `[]`.
 - `trackViewOncePerSession` - track views once per session. Default: `false`.
