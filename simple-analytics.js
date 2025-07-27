@@ -19,7 +19,8 @@ function initSimpleAnalytics(projectId, apiKey, userConfig = {}) {
     ignorePathname: [],
     trackViewOncePerSession: false,
     trackViewOncePerSessionKey: "isViewed",
-    trackOnCustomEvent: true,
+    trackOnCustomEvent: false,
+    headers: {},
     ...userConfig,
   };
 
@@ -44,6 +45,7 @@ function initSimpleAnalytics(projectId, apiKey, userConfig = {}) {
       "Content-Type": "application/json",
       apikey: apiKey,
       Authorization: `Bearer ${apiKey}`,
+      ...config.headers,
     };
 
     try {
