@@ -12,10 +12,16 @@ Super simple analytics script that tracks visits of your pages. It uses Supabase
 
 ### Usage
 
-Add script to tracked pages:
+Create supabase project and run some SQL to prepare database and user:
+
+```sql
+
+```
+
+Add script to tracked pages. The `prjectId`, `apiKey` and `table` are your supabase project ID, anon public api key and a table name. You can chcek these in supabase dashboard of your project.
 
 ```html
-<script src="./simple-analytics.js"></script>
+<script src="/simple-analytics.js"></script>
 <script>
   initSimpleAnalytics(
     projectId,
@@ -24,3 +30,28 @@ Add script to tracked pages:
   );
 </script>
 ```
+
+You can test it locally by adding `skipOriginCheck` in the config object. This enables tracking views from `file:` protocol and `localhost` hostname.
+
+```html
+<script src="./simple-analytics.js"></script>
+<script>
+  initSimpleAnalytics(
+    projectId,
+    apiKey,
+    { table: "simple_analytics", skipOriginCheck: true },
+  );
+</script>
+```
+
+### Configuration
+
+Some settings can be modified in the config object. These include:
+
+- `skipOriginCheck` - skips checking ignored protocols, hostnames and pathnames entirely. Useful for testing. Default: `false`.
+- `ignoreProtocol` - array of ignored protocols. Default: `['file']`.
+- `ignoreHostname` - array of ignored hostnames. Default: `['localhost']`.
+- `ignorePathname` - array of ignored pathnames. Default: `[]`.
+- `trackViewOncePerSession` - track views once per session. Default: `false`.
+- `trackViewOncePerSessionKey` - key name of the sessionStorage property when `trackViewOncePerSession` is enabled.
+- `trackOnCustomEvent` - adds listener for `sa-track` custom events to track any additional actions. Default: `false`.
