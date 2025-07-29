@@ -33,6 +33,27 @@ as PERMISSIVE
 for INSERT
 to anon
 with check (true);
+
+CREATE VIEW unique_hostnames AS
+SELECT DISTINCT hostname FROM simple_analytics;
+
+CREATE VIEW most_visited_pathnames AS
+SELECT
+  hostname,
+  pathname,
+  COUNT(*) AS views
+FROM simple_analytics
+GROUP BY hostname, pathname
+ORDER BY hostname, views DESC;
+
+CREATE VIEW daily_views_for_hostname AS
+SELECT
+  hostname,
+  timestamp::date AS date,
+  COUNT(*)        AS views
+FROM simple_analytics
+GROUP BY hostname, date
+ORDER BY hostname, date;
 ```
 
 Add script to tracked pages. The `prjectId`, `apiKey` and `table` are your Supabase project ID, anon public API key and a table name. You can check these in supabase dashboard of your project.
