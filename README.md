@@ -1,4 +1,4 @@
-# simple-analytics
+# Simple Analytics
 
 Super simple analytics script that tracks visits of your pages. It uses Supabase API by default but can be easily modified to send data to any backend.
 
